@@ -6,6 +6,11 @@ import App from './App'
 import router from './router/index.js'
 //
 import './directives'
+//
+import './components'
+// 引入 store/index.js 的默认值
+import store from './store'
+
 // 设置 false 以阻止 Vue 在启动时生成生产提示
 Vue.config.productionTip = false
 
@@ -15,6 +20,11 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  // 注入 store
+  store,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  created() {
+    console.log(this.$options.el) // => '#app'
+  }
 })
