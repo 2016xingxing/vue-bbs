@@ -1,3 +1,6 @@
+
+
+[demo](https://your_username.github.io/vuejs-essential/dist/)
 # vuejs-essential
 
 > A Vue.js project
