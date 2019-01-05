@@ -1,6 +1,6 @@
 
 
-[demo](https://your_username.github.io/vuejs-essential/dist/)
+[demo](https://2016xingxing.github.io/vue-bbs/dist/index.html)
 # vuejs-essential
 
 > A Vue.js project
