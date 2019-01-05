@@ -34,6 +34,11 @@ const actions = {
     commit('UPDATE_AUTH', true)
     // 跳转到首页
     router.push('/')
+  },
+  logout({ commit }) {
+    // 更新当前用户的登录状态为未登录
+    commit('UPDATE_AUTH', false)
+    router.push({ name: 'Home', params: { logout: true } })
   }
 }
 

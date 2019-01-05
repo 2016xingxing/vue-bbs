@@ -29,11 +29,7 @@ export default {
     show(value) {
       if (value) {
         this.$nextTick(() => {
-          // 可以触发一个事件来更新 show
-          this.$emit('update:show', false)
-
-          // 不可以直接修改 show，这会导致 Vue 在控制台发出错误警告
-          this.show = false
+          this.$el.scrollIntoView(true)
         })
       }
     }
@@ -47,5 +43,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>
