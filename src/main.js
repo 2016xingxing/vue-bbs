@@ -4,6 +4,8 @@ import Vue from 'vue'
 import App from './App'
 // 引入 route.vue 的默认值
 import router from './router/index.js'
+//
+import './directives'
 // 设置 false 以阻止 Vue 在启动时生成生产提示
 Vue.config.productionTip = false
 
