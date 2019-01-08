@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       logo: {
-        src: `${this.uploadsUrl}sites/ByvFbNlQYVwhvTyBgLdqitchoacDNznN.jpg`,
+        src: `${this.uploadsUrl}logo.png`,
         title: 'VuejsCaff'
       },
       navList: ['社区', '头条', '问答', '教程'],
@@ -54,7 +54,7 @@ export default {
     }
   },
   beforeCreate() {
-    this.uploadsUrl = 'https://vuejscaffcdn.phphub.org/uploads/'
+    this.uploadsUrl = 'http://www.coderedu.com/'
   },
   methods: {
     changeNavIndex(index) {
