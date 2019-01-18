@@ -46,24 +46,36 @@ export default [
     ]
   },
   // 文章创建
-   {
+  {
     path: '/articles/create',
     name: 'Create',
     component: () => import('@/views/articles/Create'),
     meta: { auth: true }
   },
-  // 文章详情
-  {
-    path: '/articles/:articleId/content',
-    name: 'Content',
-    component: () => import('@/views/articles/Content.vue')
-  },
+  
   // 文章编辑
   {
     path: '/articles/:articleId/edit',
     name: 'Edit',
     component: () => import('@/views/articles/Create'),
     meta: { auth: true }
+  },
+  // 个人专栏
+  {
+    path: '/:user',
+    component: () => import('@/views/articles/Column'),
+    children: [
+      {
+        path: '',
+        name: 'Column',
+        component: () => import('@/views/articles/List.vue')
+      },
+      {
+        path: '/articles/:articleId/content',
+        name: 'Content',
+        component: () => import('@/views/articles/Content.vue')
+      }
+    ]
   },
   
 ]
