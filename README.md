@@ -8,10 +8,8 @@
 
 ## 配置
 
-修改config下 index.js的 assetsPublicPath 为 "/"
+修改config下 index.js的 assetsPublicPath 为 "/",
 github上，为了展示设置为 "/vue-bbs/dist/"
-
-/vue-bbs/dist/
 
 ## 进行安装
 
