@@ -34,7 +34,8 @@
           <div class="user-lists">
             <span v-for="likeUser in likeUsers">
               <!-- 点赞用户是当前用户时，加上类 animated 和 swing 以显示一个特别的动画  -->
-              <img :src="user && user.avatar" class="img-thumbnail avatar avatar-middle" :class="{ 'animated swing' : likeUser.uid === 1 }">
+              <router-link :to="`/${likeUser.uname}`" :src="likeUser.uavatar" tag="img" class="img-thumbnail avatar avatar-middle" :class="{ 'animated swing' : likeUser.uid === 1 }"></router-link> 
+
             </span>
           </div>
           <div v-if="!likeUsers.length" class="vote-hint">成为第一个点赞的人吧 ?</div>
@@ -80,6 +81,17 @@
                 <router-link :to="`/${comment.uname}`" class="remove-padding-left author rm-link-color">
                   {{ comment.uname }}
                 </router-link>
+                <!-- 编辑删除图标 -->
+                <span v-if="auth" class="operate pull-right">
+                  <span v-if="comment.uid === 1">
+                    <a href="javascript:;" @click="editComment(comment.commentId, index)"><i class="fa fa-edit"></i></a>
+                    <span> ⋅ </span>
+                    <a href="javascript:;" @click="deleteComment(comment.commentId)"><i class="fa fa-trash-o"></i></a>
+                  </span>
+                </span>
+
+
+
                 <div class="meta">
                   <a :id="`reply${index + 1}`" :href="`#reply${index + 1}`" class="anchor">#{{ index + 1 }}</a>
                   <span> ⋅ </span>
@@ -106,8 +118,11 @@
         <textarea v-else disabled class="form-control" placeholder="需要登录后才能发表评论." style="height:172px"></textarea>
       </div>
       <div class="form-group reply-post-submit">
-        <button id="reply-btn" :disabled="!auth" @click="comment" class="btn btn-primary">回复</button>
-        <span class="help-inline">Ctrl+Enter</span>
+        <button id="reply-btn" :disabled="!auth" @click="comment" class="btn btn-primary">
+          {{ commentId ? '保存编辑' : '回复' }}
+        </button>
+        <span v-show="commentId" class="help-inline btn-cancel" style="cursor:pointer" @click="cancelEditComment">取消编辑</span>
+        <span v-show="!commentId" class="help-inline">Ctrl+Enter</span>
       </div>
       <div v-show="commentHtml" id="preview-box" class="box preview markdown-body" v-html="commentHtml"></div>
     </div>
@@ -143,6 +158,7 @@ export default {
       someUrl:'http://www.baidu.com',
       commentHtml: '', // 评论 HTML
       comments: [], // 评论列表
+      commentId: undefined, // 评论 ID 
     }
   },
   // 添加计算属性
@@ -222,6 +238,9 @@ export default {
         // 使用 Ctrl+Enter 时提交评论
         if (event.ctrlKey && event.keyCode === 13) {
           this.comment()
+        } else if (this.commentId && event.keyCode === 27) { // 存在 commentId，且按下 Esc 键时
+          // 取消编辑评论
+          this.cancelEditComment()
         }
       })
 
@@ -269,16 +288,19 @@ export default {
           this.likeClass = ''
           // 分发 like 事件取消赞，更新实例的 likeUsers 为返回的值
           this.$store.dispatch('like', { articleId }).then((likeUsers) => {
-            this.likeUsers = likeUsers
+            // 使用带用户信息的点赞用户
+            this.likeUsers = this.recompute('likeUsers')
           })
         } else {
           // 添加已赞样式
           this.likeClass = 'active animated rubberBand'
           // 分发 like 事件，传入 isAdd 参数点赞，更新实例的 likeUsers 为返回的值
           this.$store.dispatch('like', { articleId, isAdd: true }).then((likeUsers) => {
-            this.likeUsers = likeUsers
+            // 使用带用户信息的点赞用户
+            this.likeUsers = this.recompute('likeUsers')
           })
-        }
+        } 
+          
       }
     },
     comment() {
@@ -287,34 +309,39 @@ export default {
         // 分发 comment 事件以提交评论
         this.$store.dispatch('comment', {
           comment: { content: this.commentMarkdown },
-          articleId: this.articleId
-        }).then((comments) => {
-          // 在浏览器的控制台打印返回的评论列表
-          console.log(comments)
-          // 在 .then 的回调里，调用 this.renderComments 渲染评论
-          this.renderComments
-        })
+          articleId: this.articleId,
+          // 传入 commentId
+          commentId: this.commentId
+        }).then(this.renderComments)
 
-        // 清空编辑器
-        this.simplemde.value('')
-        // 使回复按钮获得焦点
-        document.querySelector('#reply-btn').focus()
-        // 将最后的评论滚动到页面的顶部
-        this.$nextTick(() => {
-          const lastComment = document.querySelector('#reply-list li:last-child')
-          if (lastComment) lastComment.scrollIntoView(true)
-        })
+        if (this.commentId) { // 有 commentId 时，取消编辑评论
+              this.cancelEditComment()
+        } else {
+            // 没有 commentId 时，写入原来的逻辑
+            // 清空编辑器
+            this.simplemde.value('')
+            // 使回复按钮获得焦点
+            document.querySelector('#reply-btn').focus()
+            // 将最后的评论滚动到页面的顶部
+            this.$nextTick(() => {
+              const lastComment = document.querySelector('#reply-list li:last-child')
+              if (lastComment) lastComment.scrollIntoView(true)
+            })
+        }
+        
       }
     },
     renderComments(comments) {
       if (Array.isArray(comments)) {
+        // 使用带用户信息的评论
+        comments = this.recompute('comments')
         // 深拷贝 comments 以不影响其原值
         const newComments = comments.map(comment => ({ ...comment }))
         const user = this.user || {}
 
         for (let comment of newComments) {
-          comment.uname = user.name
-          comment.uavatar = user.avatar
+          // comment.uname = user.name
+          // comment.uavatar = user.avatar
           // 将评论内容从 Markdown 转成 HTML
           comment.content = SimpleMDE.prototype.markdown(emoji.emojify(comment.content, name => name))
         }
@@ -324,6 +351,79 @@ export default {
         // 将 Markdown 格式的评论添加到当前实例
         this.commentsMarkdown = comments
       }
+    },
+    // 编辑评论
+    editComment(commentId, commentIndex) {
+      // 编辑器
+      const simplemde = this.simplemde
+      // 编辑器
+      const codemirror = simplemde.codemirror
+      // Markdown 格式的所有评论
+      const comments = this.commentsMarkdown
+
+      for (const comment of comments) {
+        // 找到与 commentId 对应的评论时
+        if (parseInt(comment.commentId) === parseInt(commentId)) {
+          // 设置编辑器的内容
+          simplemde.value(comment.content)
+          // 使编辑器获得焦点
+          codemirror.focus()
+          // 将光标移到内容的后面
+          codemirror.setCursor(codemirror.lineCount(), 0)
+          // 评论索引 + 1，用来指示页面滚动的位置
+          this.commentIndex = commentIndex + 1
+          // 更新 commentId
+          this.commentId = commentId
+          break
+        }
+      }
+    },
+    // 取消编辑评论
+    cancelEditComment() {
+      // 清除 commentId
+      this.commentId = undefined
+      // 清空编辑器
+      this.simplemde.value('')
+
+      // 下次 DOM 更新后，将评论滚动回视图的顶部
+      this.$nextTick(() => {
+        if (this.commentIndex === undefined) return
+        const currentComment = document.querySelector(`#reply-list li:nth-child(${this.commentIndex})`)
+
+        if (currentComment) {
+          currentComment.scrollIntoView(true)
+          currentComment.querySelector('.operate a').focus()
+        }
+      })
+    },
+    // 删除评论
+    deleteComment(commentId) {
+      this.$swal({
+        text: '你确定要删除此评论吗?',
+        confirmButtonText: '删除'
+      }).then((res) => {
+        if (res.value) {
+          // 此时不用传入 comment
+          this.$store.dispatch('comment', {
+            commentId,
+            articleId: this.articleId
+          }).then(this.renderComments)
+          this.cancelEditComment()
+        }
+      })
+    },
+    // 返回带用户信息的文章的某项属性
+    recompute(key) {
+      const articleId = this.$route.params.articleId
+      // 这里的文章是基于 getters.computedArticles 的，所以包含用户信息了
+      const article = this.$store.getters.getArticleById(articleId)
+      let arr
+
+      if (article) {
+        arr = article[key]
+      }
+
+      return arr || []
     },
   }
 }
