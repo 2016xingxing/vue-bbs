@@ -24,6 +24,8 @@
 
         <!-- 入口组件 -->
         <div class="navbar-right">
+          <!-- 搜索框 -->
+          <SearchInput/>
           <TheEntry/>
         </div>
 
@@ -35,12 +37,16 @@
 <script>
 // 引入 TheEntry.vue 的默认值
 import TheEntry from '@/components/layouts/TheEntry'
+// 引入 SearchInput.vue 默认值
+import SearchInput from '@/components/layouts/SearchInput'
 
 export default {
   name: 'TheHeader',
   // 添加 components 选项，并注册 TheEntry
   components: {
-    TheEntry
+    TheEntry,
+    // 注册 SearchInput
+    SearchInput
   },
   data() {
     return {

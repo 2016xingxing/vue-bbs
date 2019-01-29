@@ -26,8 +26,8 @@ export default {
   props: {
     // 轮播项
     slides: {
-      type: Object,
-      default: () => ({})
+      type: Array,
+      default: () => []
     },
     // 是否自动轮播
      autoplay: {
