@@ -10,8 +10,8 @@
 
         <div class="panel-body" data-validator-form>
           <div class="form-group">
-            <label class="control-label">用户名</label>
-            <input v-model.trim="username" v-validator.required="{ title: '用户名' }" type="text" class="form-control" placeholder="请填写用户名">
+            <label class="control-label">手机号码</label>
+            <input v-model.trim="username" v-validator.required="{ title: '手机号码' }" type="text" class="form-control" placeholder="请填写手机号码">
           </div>
           <div class="form-group">
             <label class="control-label">密码</label>
@@ -51,24 +51,65 @@ export default {
     },
     submit() {
       // 表单里的用户信息
-      const user = {
-        name: this.username,
-        password: this.password
-      }
-      // 仓库的用户信息
-      const localUser = this.$store.state.user
+      // const user = {
+      //   name: this.username,
+      //   password: this.password
+      // }
+      // // 仓库的用户信息
+      // const localUser = this.$store.state.user
 
-      if (localUser) {
-        // 检查用户名和密码是否匹配
-        if (localUser.name !== user.name || localUser.password !== user.password) {
-          this.showMsg('用户名或密码不正确')
-        } else {
-          // 匹配时，分发 login 事件进行登录
-          this.$store.dispatch('login')
-        }
-      } else {
-        this.showMsg('不存在该用户')
-      }
+      // if (localUser) {
+      //   // 检查用户名和密码是否匹配
+      //   if (localUser.name !== user.name || localUser.password !== user.password) {
+      //     this.showMsg('用户名或密码不正确')
+      //   } else {
+      //     // 匹配时，分发 login 事件进行登录
+      //     this.$store.dispatch('login')
+
+      //   }
+      // } else {
+      //   this.showMsg('不存在该用户')
+      // }
+        var thatSwal = this.$swal
+       
+        this.$axios.post('/apis/authorizations',{
+            
+            username: this.username,
+            password: this.password
+            
+        })
+        .then((response) => {
+       
+          console.log(response.data)
+          
+          localStorage.setItem('authorization',JSON.stringify(response.data))
+          
+          this.$axios.get('/apis/user').then((response) => {
+              console.log(response)
+              // 分发 login 事件，以保存用户信息和登录
+              this.$store.dispatch('login', response.data)
+              
+          })
+
+          this.showMsg('登陆成功', 'success')
+        })
+        .catch(function (error) {
+          
+          if(error.response!=null)
+          {
+            thatSwal({
+              text: error.response.data.message,
+              confirmButtonText: '我知道了',
+              showCancelButton: false
+            })
+          }
+          
+        });
+
+
+
+
+
     },
     showMsg(msg, type = 'warning') {
       this.msg = msg

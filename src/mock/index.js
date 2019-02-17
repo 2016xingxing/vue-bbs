@@ -2,7 +2,7 @@ import Mock from 'mockjs'
 import store from '../store'
 
 // 拦截活跃用户请求并返回相关数据
-Mock.mock('/users/active', 'get', () => {
+Mock.mock('/api/actived/users', 'get', () => {
   // 使用派生状态 computedArticles
   let articles = store.getters.computedArticles
   let comments = []

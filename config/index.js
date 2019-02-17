@@ -10,7 +10,20 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    // 代理
+    proxyTable: {
+      '/apis': {
+        target: 'http://homestead.test/api/',//设置你调用的接口域名和端口号 别忘了加http
+        changeOrigin: true,
+        pathRewrite: {
+          '^/apis': ''
+        },
+        headers:{
+         //这边可以堆headers进行设置
+          "Accept-Language": "zh-CN",
+        }
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST

@@ -14,7 +14,7 @@
               </h4>
             </div>
             <div class="modal-body">
-              <slot></slot>
+              <slot name="body"></slot>
             </div>
             <div class="modal-footer">
               <slot name="footer"></slot>

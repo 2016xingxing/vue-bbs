@@ -23,6 +23,26 @@ import './mock'
 // 引入 axios 的默认值
 import axios from 'axios'
 
+
+
+axios.interceptors.request.use(
+  config => {
+    let authorization = JSON.parse(localStorage.getItem("authorization"));
+    
+    if (authorization) {  
+      
+      let Authorization= authorization.token_type + ' '+ authorization.access_token;
+      // 判断是否存在token，如果存在的话，则每个http header都加上token
+      // console.log(Authorization)
+      config.headers.Authorization= `${Authorization}`;
+    }
+   
+    return config;
+  },
+  err => {
+    return Promise.reject(err);
+
+});
 // 将 axios 添加到 Vue.prototype 上，使其在实例内部的所有组件中可用
 Vue.prototype.$axios = axios
 
@@ -38,7 +58,7 @@ Vue.config.productionTip = false
 // 测试数据
 const AddMockData = (() => {
   // 是否加入测试数据
-  const isAddMockData = true
+  const isAddMockData = false
   // 用户数据
   let userArticles = ls.getItem('articles')
 
@@ -56,6 +76,10 @@ const AddMockData = (() => {
     store.commit('UPDATE_ARTICLES', userArticles)
   }
 })()
+
+
+
+
 
 // eslint 配置，允许 new 一个实例后不赋值，我们没有使用 eslint，如果有，则下一行注释不可缺少
 /* eslint-disable no-new */
