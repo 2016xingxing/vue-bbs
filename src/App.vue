@@ -14,6 +14,8 @@ import TheHeader from '@/components/layouts/TheHeader'
 // 引入 TheFooter.vue 的默认值
 import TheFooter from '@/components/layouts/TheFooter'
 
+
+
 export default {
   name: 'App',
   // 使用头部组建
@@ -21,8 +23,10 @@ export default {
     // 注册 TheHeader
     TheHeader,
     // 注册 TheFooter
-    TheFooter
+    TheFooter,
+
   }
+ 
 }
 </script>
 

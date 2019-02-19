@@ -38,7 +38,10 @@
         </div>
         <!-- 分页组件 -->
         <div class="panel-footer text-right remove-padding-horizontal pager-footer">
-          <Pagination :currentPage="currentPage" :total="total" :pageSize="pageSize" :onPageChange="changePage" />
+
+          
+           <Pagination :pagination="pagination"  :callback="setDataByFilter" :options="paginationOptions"></Pagination>
+
         </div>
       </div>
     </div>
@@ -52,11 +55,14 @@ import { mapState } from 'vuex'
 // 引入 TheSidebar.vue 的默认值
 import TheSidebar from '@/components/layouts/TheSidebar'
 
+import Pagination from 'vue-bootstrap-pagination'
+
 export default {
   name: 'Home',
   components: {
     // 局部注册 TheSidebar
-    TheSidebar
+    TheSidebar,
+    Pagination
   },
   data() {
     return {
@@ -66,14 +72,28 @@ export default {
       articles: [], // 文章列表
       filter: 'default', // 默认过滤方式
       filters: [ // 过滤方式列表
-        { filter: 'default', name: '活跃', title: '最后回复排序'},
-        { filter: 'excellent', name: '精华', title: '只看加精的话题'},
-        { filter: 'vote', name: '投票', title: '点赞数排序'},
-        { filter: 'recent', name: '最近', title: '发布时间排序'},
-        { filter: 'noreply', name: '零回复', title: '无人问津的话题'}
+        // { filter: 'default', name: '活跃', title: '最后回复排序'},
+        // { filter: 'excellent', name: '精华', title: '只看加精的话题'},
+        // { filter: 'vote', name: '投票', title: '点赞数排序'},
+        // { filter: 'recent', name: '最近', title: '发布时间排序'},
+        // { filter: 'noreply', name: '零回复', title: '无人问津的话题'}
       ],
-      total: 0, // 文章总数
-      pageSize: 20, // 每页条数
+      
+      pagination: {
+        total: 0,
+        per_page: 12,    // required
+        current_page: 1, // required
+        last_page: 0,    // required
+        from: 1,
+        to: 12
+      },
+      paginationOptions: {
+        offset: 5,
+        previousText: '上一页',
+        nextText: '下一页',
+        alwaysShowPrevNext: true
+      }
+
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -130,6 +150,12 @@ export default {
     }
   },
   methods: {
+    getResults (page) {
+       
+
+
+    },
+
     showMsg(msg, type = 'success') {
       this.msg = msg
       this.msgType = type
@@ -137,18 +163,67 @@ export default {
     },
     // 设置相关数据
     setDataByFilter(filter = 'default') {
-      // 每页条数
-      const pageSize = this.pageSize
-      // 当前页
-      const currentPage = this.currentPage
-      // 过滤后的所有文章
-      const allArticles = this.$store.getters.getArticlesByFilter(filter)
 
-      this.filter = filter
-      // 文章总数
-      this.total = allArticles.length
-      // 当前页的文章
-      this.articles = allArticles.slice(pageSize * (currentPage - 1), pageSize * currentPage)
+
+
+          this.$axios.get('/apis/topics')
+          .then((response) => {
+
+
+      //       pagination: {
+      //   total: 0,
+      //   per_page: 12,    // required
+      //   current_page: 1, // required
+      //   last_page: 0,    // required
+      //   from: 1,
+      //   to: 12
+      // },
+              // console.log(response.data)
+              this.filter = '';
+             
+
+              // 当前页的文章
+              this.articles = response.data.data;
+              
+              console.log(response.data.meta.pagination)
+              this.pagination = {
+
+                  total: response.data.meta.pagination.total,
+                  per_page: response.data.meta.pagination.per_page,
+                  current_page: response.data.meta.pagination.current_page,
+                  last_page: response.data.meta.pagination.total_pages,
+                  from: 1,
+                  to: 12
+              };
+
+
+          })
+          .catch(function (error) {
+            
+            if(error.response!=null)
+            {
+              thatSwal({
+                text: error.response.data.message,
+                confirmButtonText: '我知道了',
+                showCancelButton: false
+              })
+            }
+            
+          });
+
+
+      // // 每页条数
+      // const pageSize = this.pageSize
+      // // 当前页
+      // const currentPage = this.currentPage
+      // // 过滤后的所有文章
+      // const allArticles = this.$store.getters.getArticlesByFilter(filter)
+
+      // this.filter = filter
+      // // 文章总数
+      // this.total = allArticles.length
+      // // 当前页的文章
+      // this.articles = allArticles.slice(pageSize * (currentPage - 1), pageSize * currentPage)
     },
     // 回调，组件的当前页改变时调用
     changePage(page) {
